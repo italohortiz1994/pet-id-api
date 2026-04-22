@@ -34,3 +34,38 @@ npm run db:migrate
 npm run db:seed
 npm run start:dev
 ```
+
+## Conectar no PostgreSQL do Railway
+
+Essa API agora aceita conexao por `DATABASE_URL`, que e a forma mais simples de usar o PostgreSQL criado no Railway.
+
+### Variaveis recomendadas
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DBNAME
+DB_SSL=true
+```
+
+- `DATABASE_URL`: copie a string de conexao do plugin PostgreSQL no Railway
+- `DB_SSL=true`: necessario na maioria dos bancos PostgreSQL hospedados
+
+### Rodando localmente apontando para o Railway
+
+No PowerShell:
+
+```powershell
+$env:DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DBNAME"
+$env:DB_SSL="true"
+npm run db:migrate
+npm run db:seed
+npm run start:dev
+```
+
+### Rodando a API no proprio Railway
+
+Adicione no servico da API as variaveis:
+
+- `DATABASE_URL=${{Postgres.DATABASE_URL}}`
+- `DB_SSL=true`
+
+A aplicacao vai usar essa URL automaticamente no TypeORM.

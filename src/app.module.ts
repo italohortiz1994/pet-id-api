@@ -19,7 +19,7 @@ import { VetsModule } from './vets/vets.module';
     TypeOrmModule.forRoot({
       ...dataSourceOptions,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
     PetIdentityModule,
     HealthRecordsModule,

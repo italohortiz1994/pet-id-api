@@ -11,20 +11,31 @@ import { AddHealthRecords1745276400000 } from './migrations/1745276400000-AddHea
 import { AddVaccines1745278200000 } from './migrations/1745278200000-AddVaccines';
 
 const databasePort = Number(process.env.DB_PORT ?? 5432);
+const databaseUrl = process.env.DATABASE_URL;
+const useSsl =
+  (process.env.DB_SSL ?? (databaseUrl ? 'true' : 'false')).toLowerCase() ===
+  'true';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.DB_HOST ?? 'localhost',
-  port: databasePort,
-  username: process.env.DB_USERNAME ?? 'postgres',
-  password: process.env.DB_PASSWORD ?? '',
-  database: process.env.DB_DATABASE ?? 'petid',
+  ...(databaseUrl
+    ? {
+        url: databaseUrl,
+      }
+    : {
+        host: process.env.DB_HOST ?? 'localhost',
+        port: databasePort,
+        username: process.env.DB_USERNAME ?? 'postgres',
+        password: process.env.DB_PASSWORD ?? '',
+        database: process.env.DB_DATABASE ?? 'petid',
+      }),
   entities: [Pet, PetIdentity, HealthRecord, Vaccine],
   migrations: [
     InitDatabase1745193600000,
     AddHealthRecords1745276400000,
     AddVaccines1745278200000,
   ],
+  ssl: useSsl ? { rejectUnauthorized: false } : false,
   synchronize: false,
 };
 
