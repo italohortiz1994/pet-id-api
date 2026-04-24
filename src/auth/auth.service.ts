@@ -4,16 +4,21 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
+import { JwtService } from '@nestjs/jwt';
+
 import { UsersService } from '../users/users.service';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  login(data: LoginDTO) {
-    const user = this.usersService.findByEmail(data.email);
+  async login(data: LoginDTO) {
+    const user = await this.usersService.findByEmail(data.email);
 
     if (!user) {
       throw new NotFoundException('Usuario nao encontrado');
@@ -23,8 +28,14 @@ export class AuthService {
       throw new UnauthorizedException('Senha invalida');
     }
 
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
     return {
       message: 'Login realizado com sucesso',
+      access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         name: user.name,

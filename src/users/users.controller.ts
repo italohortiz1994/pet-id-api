@@ -22,7 +22,7 @@ export class UsersController {
   }
 
   @Get()
-  findAllUsers(): UserResponseDTO[] {
+  findAllUsers(): Promise<UserResponseDTO[]> {
     return this.usersService.findAll();
   }
 

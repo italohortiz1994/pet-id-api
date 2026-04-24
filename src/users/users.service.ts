@@ -1,23 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-//import { randomUUID } from 'crypto';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UserResponseDTO } from './dto/response-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
-// depois vamos usar bcrypt
-// import * as bcrypt from 'bcrypt';
-
-interface User {
-  id: string;
-  name: string;
-  birthDate: string;
-  cpf: string;
-  email: string;
-  password: string;
-}
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = []; // simulacao (depois vira banco)
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
 
   private toResponseDTO(user: User): UserResponseDTO {
     return {
@@ -29,30 +27,31 @@ export class UsersService {
     };
   }
 
-  // Criar usuario
-  create(data: CreateUserDTO): UserResponseDTO {
-    const user: User = {
-      //id: randomUUID(),
-      id: Date.now().toString(),
-      ...data,
-    };
+  async create(data: CreateUserDTO): Promise<UserResponseDTO> {
+    const existingUser = await this.usersRepository.findOne({
+      where: [{ email: data.email }, { cpf: data.cpf }],
+    });
 
-    // (producao) hash da senha
-    // user.password = await bcrypt.hash(data.password, 10);
+    if (existingUser) {
+      throw new ConflictException('Ja existe um usuario com este email ou CPF');
+    }
 
-    this.users.push(user);
+    const user = this.usersRepository.create(data);
+    const savedUser = await this.usersRepository.save(user);
 
-    return this.toResponseDTO(user);
+    return this.toResponseDTO(savedUser);
   }
 
-  // Buscar todos
-  findAll(): UserResponseDTO[] {
-    return this.users.map((user) => this.toResponseDTO(user));
+  async findAll(): Promise<UserResponseDTO[]> {
+    const users = await this.usersRepository.find();
+
+    return users.map((user) => this.toResponseDTO(user));
   }
 
-  // Buscar por ID
-  findById(id: string): UserResponseDTO {
-    const user = this.users.find((u) => u.id === id);
+  async findById(id: string): Promise<UserResponseDTO> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
 
     if (!user) {
       throw new NotFoundException('Usuario nao encontrado');
@@ -61,33 +60,48 @@ export class UsersService {
     return this.toResponseDTO(user);
   }
 
-  // Buscar por email (essencial pro login)
-  findByEmail(email: string): User | undefined {
-    return this.users.find((u) => u.email === email);
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { email },
+    });
   }
 
-  // Atualizar usuario
-  update(id: string, data: UpdateUserDTO): UserResponseDTO {
-    const user = this.users.find((u) => u.id === id);
+  async update(id: string, data: UpdateUserDTO): Promise<UserResponseDTO> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
 
     if (!user) {
       throw new NotFoundException('Usuario nao encontrado');
+    }
+
+    if (data.email && data.email !== user.email) {
+      const emailInUse = await this.usersRepository.findOne({
+        where: { email: data.email },
+      });
+
+      if (emailInUse) {
+        throw new ConflictException('Ja existe um usuario com este email');
+      }
     }
 
     Object.assign(user, data);
 
-    return this.toResponseDTO(user);
+    const updatedUser = await this.usersRepository.save(user);
+
+    return this.toResponseDTO(updatedUser);
   }
 
-  // Remover usuario
-  removeUser(id: string) {
-    const index = this.users.findIndex((u) => u.id === id);
+  async removeUser(id: string): Promise<{ message: string }> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
 
-    if (index === -1) {
+    if (!user) {
       throw new NotFoundException('Usuario nao encontrado');
     }
 
-    this.users.splice(index, 1);
+    await this.usersRepository.remove(user);
 
     return { message: 'Usuario removido com sucesso' };
   }

@@ -35,6 +35,24 @@ npm run db:seed
 npm run start:dev
 ```
 
+## Front-end do Pet ID
+
+Ao subir a API, o front-end SPA tambem fica disponivel em:
+
+```text
+http://localhost:3000/
+```
+
+O projeto inclui:
+
+- login e cadastro de tutor/usuario;
+- cadastro e listagem de pets;
+- vacinas e prontuario;
+- identidade publica com QR Code;
+- pagina publica do pet;
+- rastreamento operacional do pet;
+- cadastro e verificacao de veterinarios.
+
 ## Conectar no PostgreSQL do Railway
 
 Essa API agora aceita conexao por `DATABASE_URL`, que e a forma mais simples de usar o PostgreSQL criado no Railway.
