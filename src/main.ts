@@ -11,7 +11,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useStaticAssets(join(process.cwd(), 'frontend'));
 
-  await app.listen(process.env.PORT || 3001, '0.0.0.0');
+  const port = process.env.PORT || 3001;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Server is running on http://0.0.0.0:${port}`);
 
   process.on('uncaughtException', (err) => {
     console.error('UNCAUGHT:', err);
