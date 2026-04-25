@@ -10,7 +10,10 @@ import { InitDatabase1745193600000 } from './migrations/1745193600000-InitDataba
 import { AddHealthRecords1745276400000 } from './migrations/1745276400000-AddHealthRecords';
 import { AddVaccines1745278200000 } from './migrations/1745278200000-AddVaccines';
 import { AddUsers1760000000000 } from './migrations/1760000000000-AddUsers';
+import { AddVets1777075200000 } from './migrations/1777075200000-AddVets';
+import { AddVetProfileFields1777075300000 } from './migrations/1777075300000-AddVetProfileFields';
 import { User } from '../users/entities/user.entity';
+import { Vet } from '../vets/entities/vet.entity';
 
 const databasePort = Number(process.env.DB_PORT ?? 5432);
 const databaseUrl = process.env.DATABASE_URL;
@@ -31,12 +34,14 @@ export const dataSourceOptions: DataSourceOptions = {
         password: process.env.DB_PASSWORD ?? '',
         database: process.env.DB_DATABASE ?? 'petid',
       }),
-  entities: [Pet, PetIdentity, HealthRecord, Vaccine, User],
+  entities: [Pet, PetIdentity, HealthRecord, Vaccine, User, Vet],
   migrations: [
     InitDatabase1745193600000,
     AddHealthRecords1745276400000,
     AddVaccines1745278200000,
     AddUsers1760000000000,
+    AddVets1777075200000,
+    AddVetProfileFields1777075300000,
   ],
   ssl: useSsl ? { rejectUnauthorized: false } : false,
   synchronize: false,

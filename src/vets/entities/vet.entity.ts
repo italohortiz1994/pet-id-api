@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('vets')
@@ -19,15 +20,30 @@ export class Vet {
   @Column()
   crmv!: string; // registro profissional
 
+  @Column({ default: 'Clinica geral' })
+  specialty!: string;
+
   @Column({ nullable: true })
   clinicName!: string;
 
   @Column({ nullable: true })
   phone!: string;
 
+  @Column({ nullable: true })
+  address!: string;
+
+  @Column({ default: 'active' })
+  status!: string;
+
+  @Column({ nullable: true })
+  notes!: string;
+
   @Column({ default: false })
   isVerified!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

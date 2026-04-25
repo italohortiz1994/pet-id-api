@@ -6,6 +6,14 @@ export class UpdateVetDto {
   name?: string;
 
   @IsOptional()
+  @IsString()
+  crmv?: string;
+
+  @IsOptional()
+  @IsString()
+  specialty?: string;
+
+  @IsOptional()
   @IsEmail()
   email?: string;
 
@@ -16,4 +24,16 @@ export class UpdateVetDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
