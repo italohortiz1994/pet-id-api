@@ -87,12 +87,8 @@ export class PetNewsService {
     const limit = Math.min(Math.max(Number(query.limit ?? 20), 1), 100);
     const builder = this.repo
       .createQueryBuilder('news')
-      .leftJoinAndSelect('news.pet', 'pet')
-      .leftJoinAndSelect('news.images', 'images')
       .orderBy('news.publishedAt', 'DESC', 'NULLS LAST')
       .addOrderBy('news.createdAt', 'DESC')
-      .addOrderBy('images.sortOrder', 'ASC')
-      .addOrderBy('images.createdAt', 'ASC')
       .skip((page - 1) * limit)
       .take(limit);
 
@@ -119,7 +115,23 @@ export class PetNewsService {
       );
     }
 
-    const news = await builder.getMany();
+    const pageItems = await builder.getMany();
+    const ids = pageItems.map((item) => item.id);
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const news = await this.repo
+      .createQueryBuilder('news')
+      .leftJoinAndSelect('news.pet', 'pet')
+      .leftJoinAndSelect('news.images', 'images')
+      .where('news.id IN (:...ids)', { ids })
+      .orderBy('news.publishedAt', 'DESC', 'NULLS LAST')
+      .addOrderBy('news.createdAt', 'DESC')
+      .addOrderBy('images.sortOrder', 'ASC')
+      .addOrderBy('images.createdAt', 'ASC')
+      .getMany();
 
     return Promise.all(news.map((item) => this.toResponse(item)));
   }
