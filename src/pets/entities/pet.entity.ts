@@ -7,7 +7,7 @@ import {
 
 @Entity('pets')
 export class Pet {
-  @PrimaryGeneratedColumn('identity')
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column()

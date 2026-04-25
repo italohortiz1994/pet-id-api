@@ -1,4 +1,9 @@
-import { IsBooleanString, IsOptional, IsString } from 'class-validator';
+import {
+  IsBooleanString,
+  IsNumberString,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class PetNewsQueryDto {
   @IsOptional()
@@ -8,6 +13,18 @@ export class PetNewsQueryDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  page?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
 
   @IsOptional()
   @IsBooleanString()

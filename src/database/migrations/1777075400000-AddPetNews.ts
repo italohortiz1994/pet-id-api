@@ -7,7 +7,7 @@ export class AddPetNews1777075400000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "pet_news" (
         "id" SERIAL NOT NULL,
-        "petId" character varying,
+        "petId" uuid,
         "title" character varying NOT NULL,
         "summary" character varying,
         "content" text,
@@ -32,9 +32,18 @@ export class AddPetNews1777075400000 implements MigrationInterface {
     await queryRunner.query(
       'CREATE INDEX IF NOT EXISTS "IDX_pet_news_publishedAt" ON "pet_news" ("publishedAt")',
     );
+    await queryRunner.query(`
+      ALTER TABLE "pet_news"
+      ADD CONSTRAINT "FK_pet_news_petId"
+      FOREIGN KEY ("petId") REFERENCES "pets"("id")
+      ON DELETE SET NULL
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      'ALTER TABLE "pet_news" DROP CONSTRAINT IF EXISTS "FK_pet_news_petId"',
+    );
     await queryRunner.query('DROP INDEX IF EXISTS "IDX_pet_news_publishedAt"');
     await queryRunner.query('DROP INDEX IF EXISTS "IDX_pet_news_category"');
     await queryRunner.query('DROP INDEX IF EXISTS "IDX_pet_news_petId"');

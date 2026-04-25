@@ -3,8 +3,11 @@ import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
 import { PetIdentity } from '../pet-identity/entities/pet-identity.entity';
+import { PetComment } from '../pet-comments/entities/pet-comment.entity';
+import { PetFriendship } from '../pet-friends/entities/pet-friendship.entity';
 import { Pet } from '../pets/entities/pet.entity';
 import { PetNews } from '../pet-news/entities/pet-news.entity';
+import { PetNewsImage } from '../pet-news-images/entities/pet-news-image.entity';
 import { HealthRecord } from '../health-records/entities/health-record.entity';
 import { Vaccine } from '../health-records/entities/vaccine.entity';
 import { InitDatabase1745193600000 } from './migrations/1745193600000-InitDatabase';
@@ -14,6 +17,7 @@ import { AddUsers1760000000000 } from './migrations/1760000000000-AddUsers';
 import { AddVets1777075200000 } from './migrations/1777075200000-AddVets';
 import { AddVetProfileFields1777075300000 } from './migrations/1777075300000-AddVetProfileFields';
 import { AddPetNews1777075400000 } from './migrations/1777075400000-AddPetNews';
+import { AddPetSocial1777075500000 } from './migrations/1777075500000-AddPetSocial';
 import { User } from '../users/entities/user.entity';
 import { Vet } from '../vets/entities/vet.entity';
 
@@ -36,7 +40,18 @@ export const dataSourceOptions: DataSourceOptions = {
         password: process.env.DB_PASSWORD ?? '',
         database: process.env.DB_DATABASE ?? 'petid',
       }),
-  entities: [Pet, PetIdentity, HealthRecord, Vaccine, User, Vet, PetNews],
+  entities: [
+    Pet,
+    PetIdentity,
+    HealthRecord,
+    Vaccine,
+    User,
+    Vet,
+    PetNews,
+    PetComment,
+    PetNewsImage,
+    PetFriendship,
+  ],
   migrations: [
     InitDatabase1745193600000,
     AddHealthRecords1745276400000,
@@ -45,6 +60,7 @@ export const dataSourceOptions: DataSourceOptions = {
     AddVets1777075200000,
     AddVetProfileFields1777075300000,
     AddPetNews1777075400000,
+    AddPetSocial1777075500000,
   ],
   ssl: useSsl ? { rejectUnauthorized: false } : false,
   synchronize: false,

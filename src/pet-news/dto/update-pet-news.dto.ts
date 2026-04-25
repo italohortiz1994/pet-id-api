@@ -1,8 +1,15 @@
-import { IsBoolean, IsDateString, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class UpdatePetNewsDto {
   @IsOptional()
-  @IsString()
+  @IsUUID()
   petId?: string;
 
   @IsOptional()
@@ -20,6 +27,11 @@ export class UpdatePetNewsDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imageUrls?: string[];
 
   @IsOptional()
   @IsString()

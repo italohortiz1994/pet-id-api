@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { PetComment } from '../pet-comments/entities/pet-comment.entity';
+import { PetNewsImage } from '../pet-news-images/entities/pet-news-image.entity';
 import { CreatePetNewsDto } from './dto/create-pet-news.dto';
 import { PetNewsQueryDto } from './dto/pet-news-query.dto';
 import { UpdatePetNewsDto } from './dto/update-pet-news.dto';
@@ -11,9 +13,37 @@ export class PetNewsService {
   constructor(
     @InjectRepository(PetNews)
     private readonly repo: Repository<PetNews>,
+    @InjectRepository(PetNewsImage)
+    private readonly imageRepo: Repository<PetNewsImage>,
+    @InjectRepository(PetComment)
+    private readonly commentRepo: Repository<PetComment>,
   ) {}
 
-  create(dto: CreatePetNewsDto) {
+  private async toResponse(news: PetNews) {
+    const comments = await this.commentRepo.count({
+      where: { newsId: news.id },
+    });
+    const images =
+      news.images ??
+      (await this.imageRepo.find({
+        where: { newsId: news.id },
+        order: { sortOrder: 'ASC', createdAt: 'ASC' },
+      }));
+
+    return {
+      ...news,
+      imageUrl: news.imageUrl ?? images[0]?.imageUrl ?? '',
+      images,
+      comments,
+      commentsCount: comments,
+      likes: 0,
+      likesCount: 0,
+      petName: news.pet?.name ?? '',
+      petBreed: news.pet?.breed ?? '',
+    };
+  }
+
+  async create(dto: CreatePetNewsDto) {
     const news = this.repo.create({
       petId: dto.petId ?? null,
       title: dto.title,
@@ -31,45 +61,97 @@ export class PetNewsService {
           : new Date(),
     });
 
-    return this.repo.save(news);
+    const savedNews = await this.repo.save(news);
+    const imageUrls = [
+      ...(dto.imageUrl ? [dto.imageUrl] : []),
+      ...(dto.imageUrls ?? []),
+    ];
+
+    if (imageUrls.length > 0) {
+      await this.imageRepo.save(
+        imageUrls.map((imageUrl, index) =>
+          this.imageRepo.create({
+            newsId: savedNews.id,
+            imageUrl,
+            sortOrder: index,
+          }),
+        ),
+      );
+    }
+
+    return this.findOne(savedNews.id);
   }
 
-  findAll(query: PetNewsQueryDto) {
-    const where: FindOptionsWhere<PetNews> = {};
+  async findAll(query: PetNewsQueryDto) {
+    const page = Math.max(Number(query.page ?? 1), 1);
+    const limit = Math.min(Math.max(Number(query.limit ?? 20), 1), 100);
+    const builder = this.repo
+      .createQueryBuilder('news')
+      .leftJoinAndSelect('news.pet', 'pet')
+      .leftJoinAndSelect('news.images', 'images')
+      .orderBy('news.publishedAt', 'DESC', 'NULLS LAST')
+      .addOrderBy('news.createdAt', 'DESC')
+      .addOrderBy('images.sortOrder', 'ASC')
+      .addOrderBy('images.createdAt', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit);
 
     if (query.petId) {
-      where.petId = query.petId;
+      builder.andWhere('news.petId = :petId', { petId: query.petId });
     }
 
     if (query.category) {
-      where.category = query.category;
+      builder.andWhere('news.category = :category', {
+        category: query.category,
+      });
     }
 
     if (query.published !== undefined) {
-      where.isPublished = query.published === 'true';
+      builder.andWhere('news.isPublished = :isPublished', {
+        isPublished: query.published === 'true',
+      });
     }
 
-    return this.repo.find({
-      where,
-      order: {
-        publishedAt: 'DESC',
-        createdAt: 'DESC',
-      },
-    });
+    if (query.q) {
+      builder.andWhere(
+        '(news.title ILIKE :q OR news.content ILIKE :q OR news.category ILIKE :q)',
+        { q: `%${query.q}%` },
+      );
+    }
+
+    const news = await builder.getMany();
+
+    return Promise.all(news.map((item) => this.toResponse(item)));
   }
 
   async findOne(id: number) {
-    const news = await this.repo.findOne({ where: { id } });
+    const news = await this.repo.findOne({
+      where: { id },
+      relations: {
+        pet: true,
+        images: true,
+      },
+      order: {
+        images: {
+          sortOrder: 'ASC',
+          createdAt: 'ASC',
+        },
+      },
+    });
 
     if (!news) {
       throw new NotFoundException('Noticia nao encontrada');
     }
 
-    return news;
+    return this.toResponse(news);
   }
 
   async update(id: number, dto: UpdatePetNewsDto) {
-    const news = await this.findOne(id);
+    const news = await this.repo.findOne({ where: { id } });
+
+    if (!news) {
+      throw new NotFoundException('Noticia nao encontrada');
+    }
 
     Object.assign(news, {
       ...dto,
@@ -87,11 +169,31 @@ export class PetNewsService {
           : new Date(dto.publishedAt),
     });
 
-    return this.repo.save(news);
+    await this.repo.save(news);
+
+    if (dto.imageUrls) {
+      await this.imageRepo.delete({ newsId: id });
+      await this.imageRepo.save(
+        dto.imageUrls.map((imageUrl, index) =>
+          this.imageRepo.create({
+            newsId: id,
+            imageUrl,
+            sortOrder: index,
+          }),
+        ),
+      );
+    }
+
+    return this.findOne(id);
   }
 
   async remove(id: number) {
-    const news = await this.findOne(id);
+    const news = await this.repo.findOne({ where: { id } });
+
+    if (!news) {
+      throw new NotFoundException('Noticia nao encontrada');
+    }
+
     await this.repo.remove(news);
 
     return { message: 'Noticia removida com sucesso' };

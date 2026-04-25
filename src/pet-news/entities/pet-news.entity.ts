@@ -2,16 +2,22 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PetComment } from '../../pet-comments/entities/pet-comment.entity';
+import { PetNewsImage } from '../../pet-news-images/entities/pet-news-image.entity';
+import { Pet } from '../../pets/entities/pet.entity';
 
 @Entity('pet_news')
 export class PetNews {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   petId!: string | null;
 
   @Column()
@@ -40,6 +46,16 @@ export class PetNews {
 
   @Column({ type: 'timestamp', nullable: true })
   publishedAt!: Date | null;
+
+  @ManyToOne(() => Pet, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'petId' })
+  pet!: Pet | null;
+
+  @OneToMany(() => PetComment, (comment) => comment.news)
+  commentItems!: PetComment[];
+
+  @OneToMany(() => PetNewsImage, (image) => image.news)
+  images!: PetNewsImage[];
 
   @CreateDateColumn()
   createdAt!: Date;
