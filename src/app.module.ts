@@ -9,6 +9,7 @@ import { PetIdentityModule } from './pet-identity/pet-identity.module';
 import { PetsModule } from './pets/pets.module';
 import { UsersModule } from './users/users.module';
 import { HealthRecordsModule } from './health-records/health-records.module';
+import { PetNewsModule } from './pet-news/pet-news.module';
 import { VetsModule } from './vets/vets.module';
 
 @Module({
@@ -24,6 +25,7 @@ import { VetsModule } from './vets/vets.module';
     PetIdentityModule,
     HealthRecordsModule,
     VetsModule,
+    PetNewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
