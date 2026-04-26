@@ -15,10 +15,10 @@ export class PetFriendship {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'integer' })
   requesterPetId!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'integer' })
   addresseePetId!: string;
 
   @Column({

@@ -17,7 +17,7 @@ export class PetNews {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'integer', nullable: true })
   petId!: string | null;
 
   @Column()

@@ -1,11 +1,11 @@
-import { IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PetFriendshipStatus } from '../enums/pet-friendship-status.enum';
 
 export class CreatePetFriendshipDto {
-  @IsUUID()
+  @IsString()
   requesterPetId!: string;
 
-  @IsUUID()
+  @IsString()
   addresseePetId!: string;
 
   @IsOptional()

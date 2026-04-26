@@ -4,12 +4,10 @@ import {
   IsDateString,
   IsOptional,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
 export class CreatePetNewsDto {
   @IsOptional()
-  @IsUUID()
   petId?: string;
 
   @IsString()

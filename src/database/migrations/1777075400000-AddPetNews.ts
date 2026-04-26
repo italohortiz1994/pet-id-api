@@ -7,7 +7,7 @@ export class AddPetNews1777075400000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "pet_news" (
         "id" SERIAL NOT NULL,
-        "petId" uuid,
+        "petId" integer,
         "title" character varying NOT NULL,
         "summary" character varying,
         "content" text,

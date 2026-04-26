@@ -20,7 +20,7 @@ export class AddPetSocial1777075500000 implements MigrationInterface {
       CREATE TABLE IF NOT EXISTS "pet_comments" (
         "id" SERIAL NOT NULL,
         "newsId" integer NOT NULL,
-        "petId" uuid,
+        "petId" integer,
         "userId" uuid,
         "content" text NOT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
@@ -32,8 +32,8 @@ export class AddPetSocial1777075500000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "pet_friendships" (
         "id" SERIAL NOT NULL,
-        "requesterPetId" uuid NOT NULL,
-        "addresseePetId" uuid NOT NULL,
+        "requesterPetId" integer NOT NULL,
+        "addresseePetId" integer NOT NULL,
         "status" character varying NOT NULL DEFAULT 'pending',
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),

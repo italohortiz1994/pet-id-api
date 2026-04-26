@@ -19,7 +19,7 @@ export class PetComment {
   @Column()
   newsId!: number;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'integer', nullable: true })
   petId!: string | null;
 
   @Column({ type: 'uuid', nullable: true })
