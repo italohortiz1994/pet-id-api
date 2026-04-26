@@ -28,5 +28,5 @@ export class PetNewsQueryDto {
 
   @IsOptional()
   @IsBooleanString()
-  published?: string;
+  published?: string | boolean;
 }

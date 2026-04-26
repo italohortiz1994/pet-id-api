@@ -104,7 +104,7 @@ export class PetNewsService {
 
     if (query.published !== undefined) {
       builder.andWhere('news.isPublished = :isPublished', {
-        isPublished: query.published === 'true',
+        isPublished: query.published === true || query.published === 'true',
       });
     }
 
