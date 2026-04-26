@@ -18,6 +18,7 @@ import { AddVets1777075200000 } from './migrations/1777075200000-AddVets';
 import { AddVetProfileFields1777075300000 } from './migrations/1777075300000-AddVetProfileFields';
 import { AddPetNews1777075400000 } from './migrations/1777075400000-AddPetNews';
 import { AddPetSocial1777075500000 } from './migrations/1777075500000-AddPetSocial';
+import { AddPetOwnersAndNewsLikes1777075600000 } from './migrations/1777075600000-AddPetOwnersAndNewsLikes';
 import { User } from '../users/entities/user.entity';
 import { Vet } from '../vets/entities/vet.entity';
 
@@ -61,6 +62,7 @@ export const dataSourceOptions: DataSourceOptions = {
     AddVetProfileFields1777075300000,
     AddPetNews1777075400000,
     AddPetSocial1777075500000,
+    AddPetOwnersAndNewsLikes1777075600000,
   ],
   ssl: useSsl ? { rejectUnauthorized: false } : false,
   synchronize: false,

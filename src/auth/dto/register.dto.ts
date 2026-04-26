@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class RegisterDTO {
@@ -11,6 +12,9 @@ export class RegisterDTO {
   cpf!: string;
 
   @IsEmail({}, { message: 'E-mail inválido' })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   email!: string;
 
   @IsNotEmpty({ message: 'Senha é obrigatória' })

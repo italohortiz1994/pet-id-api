@@ -18,7 +18,8 @@ export class AuthService {
   ) {}
 
   async login(data: LoginDTO) {
-    const user = await this.usersService.findByEmail(data.email);
+    const email = data.email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) {
       throw new NotFoundException('Usuario nao encontrado');

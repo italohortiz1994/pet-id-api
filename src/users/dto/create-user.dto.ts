@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsEmail, MinLength } from 'class-validator';
 
 export class CreateUserDTO {
@@ -13,6 +14,9 @@ export class CreateUserDTO {
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @IsEmail({}, { message: 'E-mail inválido' })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   email!: string;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call

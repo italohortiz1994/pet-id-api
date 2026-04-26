@@ -44,6 +44,9 @@ export class PetNews {
   @Column({ type: 'boolean', default: true })
   isPublished!: boolean;
 
+  @Column({ type: 'integer', default: 0 })
+  likesCount!: number;
+
   @Column({ type: 'timestamp', nullable: true })
   publishedAt!: Date | null;
 

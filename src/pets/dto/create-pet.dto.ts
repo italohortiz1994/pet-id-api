@@ -1,15 +1,19 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreatePetDTO {
-  @IsNotEmpty({ message: 'Nome do animal é obrigatório' })
+  @IsNotEmpty({ message: 'Nome do animal e obrigatorio' })
   name!: string;
 
-  @IsNotEmpty({ message: 'Raça do animal é obrigatória' })
+  @IsNotEmpty({ message: 'Raca do animal e obrigatoria' })
   breed!: string;
 
-  @IsNotEmpty({ message: 'Idade do animal é obrigatória' })
+  @IsNotEmpty({ message: 'Idade do animal e obrigatoria' })
   age!: number;
 
-  @IsNotEmpty({ message: 'Sexo do animal é obrigatório' })
+  @IsNotEmpty({ message: 'Sexo do animal e obrigatorio' })
   gender!: string;
+
+  @IsOptional()
+  @IsUUID()
+  userId?: string;
 }

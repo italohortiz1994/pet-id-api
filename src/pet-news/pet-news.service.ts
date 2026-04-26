@@ -36,8 +36,8 @@ export class PetNewsService {
       images,
       comments,
       commentsCount: comments,
-      likes: 0,
-      likesCount: 0,
+      likes: news.likesCount ?? 0,
+      likesCount: news.likesCount ?? 0,
       petName: news.pet?.name ?? '',
       petBreed: news.pet?.breed ?? '',
     };
@@ -53,6 +53,7 @@ export class PetNewsService {
       category: dto.category ?? null,
       sourceName: dto.sourceName ?? null,
       sourceUrl: dto.sourceUrl ?? null,
+      likesCount: 0,
       isPublished: dto.isPublished ?? true,
       publishedAt: dto.publishedAt
         ? new Date(dto.publishedAt)
@@ -195,6 +196,19 @@ export class PetNewsService {
         ),
       );
     }
+
+    return this.findOne(id);
+  }
+
+  async like(id: number) {
+    const news = await this.repo.findOne({ where: { id } });
+
+    if (!news) {
+      throw new NotFoundException('Noticia nao encontrada');
+    }
+
+    news.likesCount = (news.likesCount ?? 0) + 1;
+    await this.repo.save(news);
 
     return this.findOne(id);
   }

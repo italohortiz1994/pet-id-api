@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UserResponseDTO } from './dto/response-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -28,15 +28,19 @@ export class UsersService {
   }
 
   async create(data: CreateUserDTO): Promise<UserResponseDTO> {
+    const email = data.email.trim().toLowerCase();
     const existingUser = await this.usersRepository.findOne({
-      where: [{ email: data.email }, { cpf: data.cpf }],
+      where: [{ email: ILike(email) }, { cpf: data.cpf }],
     });
 
     if (existingUser) {
       throw new ConflictException('Ja existe um usuario com este email ou CPF');
     }
 
-    const user = this.usersRepository.create(data);
+    const user = this.usersRepository.create({
+      ...data,
+      email,
+    });
     const savedUser = await this.usersRepository.save(user);
 
     return this.toResponseDTO(savedUser);
@@ -62,7 +66,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { email },
+      where: { email: ILike(email.trim().toLowerCase()) },
     });
   }
 
@@ -75,9 +79,11 @@ export class UsersService {
       throw new NotFoundException('Usuario nao encontrado');
     }
 
-    if (data.email && data.email !== user.email) {
+    const email = data.email?.trim().toLowerCase();
+
+    if (email && email !== user.email) {
       const emailInUse = await this.usersRepository.findOne({
-        where: { email: data.email },
+        where: { email: ILike(email) },
       });
 
       if (emailInUse) {
@@ -85,7 +91,10 @@ export class UsersService {
       }
     }
 
-    Object.assign(user, data);
+    Object.assign(user, {
+      ...data,
+      ...(email ? { email } : {}),
+    });
 
     const updatedUser = await this.usersRepository.save(user);
 

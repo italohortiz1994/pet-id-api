@@ -32,6 +32,11 @@ export class PetNewsController {
     return this.service.findOne(Number(id));
   }
 
+  @Post(':id/like')
+  like(@Param('id') id: string) {
+    return this.service.like(Number(id));
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdatePetNewsDto) {
     return this.service.update(Number(id), dto);

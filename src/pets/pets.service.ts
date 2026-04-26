@@ -21,6 +21,7 @@ export class PetsService {
       breed: pet.breed,
       age: pet.age,
       gender: pet.gender,
+      userId: pet.userId,
     };
   }
 

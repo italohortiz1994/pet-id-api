@@ -15,4 +15,7 @@ export class PetResponseDTO {
 
   @Expose()
   gender!: string;
+
+  @Expose()
+  userId!: string | null;
 }
