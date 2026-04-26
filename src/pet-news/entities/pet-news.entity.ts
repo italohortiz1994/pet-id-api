@@ -17,7 +17,7 @@ export class PetNews {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'integer', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   petId!: string | null;
 
   @Column()

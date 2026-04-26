@@ -10,7 +10,7 @@ import { User } from '../../users/entities/user.entity';
 
 @Entity('pets')
 export class Pet {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column()

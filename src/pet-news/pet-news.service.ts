@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PetComment } from '../pet-comments/entities/pet-comment.entity';
 import { PetNewsImage } from '../pet-news-images/entities/pet-news-image.entity';
+import { Pet } from '../pets/entities/pet.entity';
 import { CreatePetNewsDto } from './dto/create-pet-news.dto';
 import { PetNewsQueryDto } from './dto/pet-news-query.dto';
 import { UpdatePetNewsDto } from './dto/update-pet-news.dto';
@@ -17,12 +18,26 @@ export class PetNewsService {
     private readonly imageRepo: Repository<PetNewsImage>,
     @InjectRepository(PetComment)
     private readonly commentRepo: Repository<PetComment>,
+    @InjectRepository(Pet)
+    private readonly petRepo: Repository<Pet>,
   ) {}
+
+  private async findPetSummary(petId: string | null) {
+    if (!petId) {
+      return null;
+    }
+
+    return this.petRepo
+      .createQueryBuilder('pet')
+      .where('pet.id::text = :petId', { petId: String(petId) })
+      .getOne();
+  }
 
   private async toResponse(news: PetNews) {
     const comments = await this.commentRepo.count({
       where: { newsId: news.id },
     });
+    const pet = await this.findPetSummary(news.petId);
     const images =
       news.images ??
       (await this.imageRepo.find({
@@ -38,8 +53,8 @@ export class PetNewsService {
       commentsCount: comments,
       likes: news.likesCount ?? 0,
       likesCount: news.likesCount ?? 0,
-      petName: news.pet?.name ?? '',
-      petBreed: news.pet?.breed ?? '',
+      petName: pet?.name ?? '',
+      petBreed: pet?.breed ?? '',
     };
   }
 
@@ -125,7 +140,6 @@ export class PetNewsService {
 
     const news = await this.repo
       .createQueryBuilder('news')
-      .leftJoinAndSelect('news.pet', 'pet')
       .leftJoinAndSelect('news.images', 'images')
       .where('news.id IN (:...ids)', { ids })
       .orderBy('news.publishedAt', 'DESC', 'NULLS LAST')
@@ -141,7 +155,6 @@ export class PetNewsService {
     const news = await this.repo.findOne({
       where: { id },
       relations: {
-        pet: true,
         images: true,
       },
       order: {
