@@ -7,6 +7,7 @@ import { PetComment } from '../pet-comments/entities/pet-comment.entity';
 import { PetFriendship } from '../pet-friends/entities/pet-friendship.entity';
 import { Pet } from '../pets/entities/pet.entity';
 import { PetNews } from '../pet-news/entities/pet-news.entity';
+import { PetNewsLike } from '../pet-news/entities/pet-news-like.entity';
 import { PetNewsImage } from '../pet-news-images/entities/pet-news-image.entity';
 import { HealthRecord } from '../health-records/entities/health-record.entity';
 import { Vaccine } from '../health-records/entities/vaccine.entity';
@@ -19,6 +20,8 @@ import { AddVetProfileFields1777075300000 } from './migrations/1777075300000-Add
 import { AddPetNews1777075400000 } from './migrations/1777075400000-AddPetNews';
 import { AddPetSocial1777075500000 } from './migrations/1777075500000-AddPetSocial';
 import { AddPetOwnersAndNewsLikes1777075600000 } from './migrations/1777075600000-AddPetOwnersAndNewsLikes';
+import { AddPetNewsLikesByUser1777075700000 } from './migrations/1777075700000-AddPetNewsLikesByUser';
+import { NormalizePetSocialIds1777075800000 } from './migrations/1777075800000-NormalizePetSocialIds';
 import { User } from '../users/entities/user.entity';
 import { Vet } from '../vets/entities/vet.entity';
 
@@ -49,6 +52,7 @@ export const dataSourceOptions: DataSourceOptions = {
     User,
     Vet,
     PetNews,
+    PetNewsLike,
     PetComment,
     PetNewsImage,
     PetFriendship,
@@ -63,6 +67,8 @@ export const dataSourceOptions: DataSourceOptions = {
     AddPetNews1777075400000,
     AddPetSocial1777075500000,
     AddPetOwnersAndNewsLikes1777075600000,
+    AddPetNewsLikesByUser1777075700000,
+    NormalizePetSocialIds1777075800000,
   ],
   ssl: useSsl ? { rejectUnauthorized: false } : false,
   synchronize: false,

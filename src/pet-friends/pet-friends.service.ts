@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Pet } from '../pets/entities/pet.entity';
 import { CreatePetFriendshipDto } from './dto/create-pet-friendship.dto';
 import { UpdatePetFriendshipDto } from './dto/update-pet-friendship.dto';
 import { PetFriendship } from './entities/pet-friendship.entity';
@@ -16,7 +17,33 @@ export class PetFriendsService {
   constructor(
     @InjectRepository(PetFriendship)
     private readonly repo: Repository<PetFriendship>,
+    @InjectRepository(Pet)
+    private readonly petRepo: Repository<Pet>,
   ) {}
+
+  private async findPetSummary(petId: string) {
+    if (!petId) {
+      return null;
+    }
+
+    return this.petRepo
+      .createQueryBuilder('pet')
+      .where('pet.id::text = :petId', { petId: String(petId) })
+      .getOne();
+  }
+
+  private async toResponse(friendship: PetFriendship) {
+    const [requesterPet, addresseePet] = await Promise.all([
+      this.findPetSummary(friendship.requesterPetId),
+      this.findPetSummary(friendship.addresseePetId),
+    ]);
+
+    return {
+      ...friendship,
+      requesterPet,
+      addresseePet,
+    };
+  }
 
   async create(dto: CreatePetFriendshipDto) {
     if (dto.requesterPetId === dto.addresseePetId) {
@@ -38,14 +65,14 @@ export class PetFriendsService {
       status: dto.status ?? PetFriendshipStatus.PENDING,
     });
 
-    return this.repo.save(friendship);
+    const savedFriendship = await this.repo.save(friendship);
+
+    return this.toResponse(savedFriendship);
   }
 
-  findAll(petId?: string, status?: PetFriendshipStatus) {
+  async findAll(petId?: string, status?: PetFriendshipStatus) {
     const query = this.repo
       .createQueryBuilder('friendship')
-      .leftJoinAndSelect('friendship.requesterPet', 'requesterPet')
-      .leftJoinAndSelect('friendship.addresseePet', 'addresseePet')
       .orderBy('friendship.createdAt', 'DESC');
 
     if (petId) {
@@ -59,14 +86,20 @@ export class PetFriendsService {
       query.andWhere('friendship.status = :status', { status });
     }
 
-    return query.getMany();
+    const friendships = await query.getMany();
+
+    return Promise.all(
+      friendships.map((friendship) => this.toResponse(friendship)),
+    );
   }
 
   async update(id: number, dto: UpdatePetFriendshipDto) {
     const friendship = await this.findOne(id);
     friendship.status = dto.status;
 
-    return this.repo.save(friendship);
+    const savedFriendship = await this.repo.save(friendship);
+
+    return this.toResponse(savedFriendship);
   }
 
   async remove(id: number) {

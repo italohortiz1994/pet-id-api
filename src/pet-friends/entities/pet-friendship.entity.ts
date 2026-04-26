@@ -15,10 +15,10 @@ export class PetFriendship {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'integer' })
+  @Column({ type: 'varchar' })
   requesterPetId!: string;
 
-  @Column({ type: 'integer' })
+  @Column({ type: 'varchar' })
   addresseePetId!: string;
 
   @Column({

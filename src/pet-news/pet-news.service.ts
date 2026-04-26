@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PetComment } from '../pet-comments/entities/pet-comment.entity';
@@ -8,6 +12,7 @@ import { CreatePetNewsDto } from './dto/create-pet-news.dto';
 import { PetNewsQueryDto } from './dto/pet-news-query.dto';
 import { UpdatePetNewsDto } from './dto/update-pet-news.dto';
 import { PetNews } from './entities/pet-news.entity';
+import { PetNewsLike } from './entities/pet-news-like.entity';
 
 @Injectable()
 export class PetNewsService {
@@ -20,7 +25,32 @@ export class PetNewsService {
     private readonly commentRepo: Repository<PetComment>,
     @InjectRepository(Pet)
     private readonly petRepo: Repository<Pet>,
+    @InjectRepository(PetNewsLike)
+    private readonly likeRepo: Repository<PetNewsLike>,
   ) {}
+
+  private getUserIdFromAuthorization(authorization: string) {
+    const [, token = ''] = authorization.split(' ');
+    const [, payload = ''] = token.split('.');
+
+    if (!payload) {
+      return '';
+    }
+
+    try {
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = `${normalized}${'='.repeat(
+        (4 - (normalized.length % 4)) % 4,
+      )}`;
+      const decoded = JSON.parse(
+        Buffer.from(padded, 'base64').toString('utf8'),
+      ) as Record<string, unknown>;
+
+      return typeof decoded.sub === 'string' ? decoded.sub : '';
+    } catch {
+      return '';
+    }
+  }
 
   private async findPetSummary(petId: string | null) {
     if (!petId) {
@@ -213,11 +243,36 @@ export class PetNewsService {
     return this.findOne(id);
   }
 
-  async like(id: number) {
+  async like(id: number, userId: string, authorization = '') {
+    const resolvedUserId = this.getUserIdFromAuthorization(authorization) || userId;
+
+    if (!resolvedUserId) {
+      throw new BadRequestException('Usuario obrigatorio para curtir.');
+    }
+
     const news = await this.repo.findOne({ where: { id } });
 
     if (!news) {
       throw new NotFoundException('Noticia nao encontrada');
+    }
+
+    const existingLike = await this.likeRepo.findOne({
+      where: { newsId: id, userId: resolvedUserId },
+    });
+
+    if (existingLike) {
+      return this.findOne(id);
+    }
+
+    try {
+      await this.likeRepo.save(
+        this.likeRepo.create({
+          newsId: id,
+          userId: resolvedUserId,
+        }),
+      );
+    } catch {
+      return this.findOne(id);
     }
 
     news.likesCount = (news.likesCount ?? 0) + 1;

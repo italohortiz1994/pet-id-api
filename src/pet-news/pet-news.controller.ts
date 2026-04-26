@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -33,8 +34,12 @@ export class PetNewsController {
   }
 
   @Post(':id/like')
-  like(@Param('id') id: string) {
-    return this.service.like(Number(id));
+  like(
+    @Param('id') id: string,
+    @Body('userId') userId: string,
+    @Headers('authorization') authorization = '',
+  ) {
+    return this.service.like(Number(id), userId, authorization);
   }
 
   @Patch(':id')

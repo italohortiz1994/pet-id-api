@@ -11,6 +11,7 @@ import {
 import { PetComment } from '../../pet-comments/entities/pet-comment.entity';
 import { PetNewsImage } from '../../pet-news-images/entities/pet-news-image.entity';
 import { Pet } from '../../pets/entities/pet.entity';
+import { PetNewsLike } from './pet-news-like.entity';
 
 @Entity('pet_news')
 export class PetNews {
@@ -59,6 +60,9 @@ export class PetNews {
 
   @OneToMany(() => PetNewsImage, (image) => image.news)
   images!: PetNewsImage[];
+
+  @OneToMany(() => PetNewsLike, (like) => like.news)
+  likeItems!: PetNewsLike[];
 
   @CreateDateColumn()
   createdAt!: Date;
